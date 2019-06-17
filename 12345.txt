@@ -1,0 +1,378 @@
+USE Training_18Apr19_CGKP
+
+CREATE TYPE Phone_115022
+FROM CHAR(10) NOT NULL
+
+CREATE TABLE Employee_115022
+(
+	EmployeeID		INT,
+	EmployeeName	VARCHAR(30),
+	DOB				DATETIME,
+	DOJ				DATETIME,
+	City			VARCHAR(20),
+	PhoneNo			Phone_115022
+)
+
+EXEC sp_help Employee_115022
+
+DROP TYPE Phone_115022
+
+CREATE TABLE Category_115022
+(
+	CategoryID		INT,
+	CategoryName	VARCHAR(30)
+)
+
+EXEC sp_help Category_115022
+
+EXEC sp_help Employee_115022
+
+--Add new column
+ALTER TABLE Employee_115022
+ADD EmailID VARCHAR(30)
+
+--Remove existing column
+ALTER TABLE Employee_115022
+DROP COLUMN PhoneNo
+
+--Modify existing column
+ALTER TABLE Employee_115022
+ALTER COLUMN EmailID VARCHAR(40)
+
+--Default
+ALTER TABLE Employee_115022
+ADD CONSTRAINT DF_EmailID_115022 DEFAULT 'hr@cg.com' FOR EmailID
+
+EXEC sp_help Employee_115022
+
+INSERT INTO Employee_115022(EmployeeID, EmployeeName, City, DOB, DOJ)
+VALUES(101, 'Robert', 'Pune', '01/12/1989', '02/20/2014')
+
+SELECT * FROM Employee_115022
+
+INSERT INTO Employee_115022(EmployeeID, EmployeeName, City, DOB, DOJ, EmailID, PhoneNo)
+VALUES(102, 'John', 'Mumbai', '05/30/1985', '12/20/2014', 'john@cg.com', '9087654321')
+
+ALTER TABLE Employee_115022
+ALTER COLUMN EmployeeID INT NOT NULL
+
+ALTER TABLE Employee_115022
+ADD CONSTRAINT PK_Employee_115022 PRIMARY KEY (EmployeeID)
+
+INSERT INTO Employee_115022(EmployeeID, EmployeeName, City, DOB, DOJ, EmailID, PhoneNo)
+VALUES(103, 'Maria', 'Bangalore', '08/01/1992', '10/10/2011', 'maria@cg.com', '9987654321')
+
+ALTER TABLE Employee_115022
+ADD PhoneNo	CHAR(10)
+
+SELECT * FROM Employee_115022
+
+DELETE FROM Employee_115022
+
+ALTER TABLE Employee_115022
+ADD CONSTRAINT U_Phone_115022 UNIQUE (PhoneNo)
+
+ALTER TABLE Employee_115022
+ADD CONSTRAINT CHK_DOJ_115022 CHECK (DOJ <= GETDATE())
+
+EXEC sp_help Employee_115022
+
+INSERT INTO Employee_115022(EmployeeID, EmployeeName, DOB, DOJ, City, EmailID, PhoneNo)
+VALUES (104, 'Albert', '12/25/1989', '08/24/2018', 'Pune', 'albert@cg.com', '9080765432')
+
+ALTER TABLE Employee_115022
+ADD CONSTRAINT CHK_City_115022 CHECK (City IN ('Pune', 'Mumbai', 'Bangalore', 'Chennai', 'Hyderabad'))
+
+INSERT INTO Employee_115022(EmployeeID, EmployeeName, DOB, DOJ, City, EmailID, PhoneNo)
+VALUES (105, 'Allister', '07/15/1994', '05/14/2018', 'Bangalore', 'allister@cg.com', '9080705432')
+
+SELECT * FROM Employee_115022
+
+EXEC sp_help Category_115022
+
+ALTER TABLE Category_115022
+ALTER COLUMN CategoryID INT NOT NULL
+
+ALTER TABLE Category_115022
+ADD CONSTRAINT PK_Category_115022 PRIMARY KEY (CategoryID)
+
+CREATE TABLE Product_115022
+(
+	ProdID		INT	CONSTRAINT PK_Product_115022 PRIMARY KEY,
+	ProdName	VARCHAR(30),
+	UnitPrice	INT	CONSTRAINT CHK_UnitPrice_115022 CHECK (UnitPrice > 0),
+	Quantity	INT CONSTRAINT CHK_Qty_115022 CHECK (Quantity BETWEEN 3 and 20),
+	CatID		INT CONSTRAINT FK_Cat_Prod_115022 REFERENCES Category_115022(CategoryID)
+)
+
+ALTER TABLE Product_115022
+ADD CONSTRAINT FK_Cat_Prod_115022 
+FOREIGN KEY (CatID)
+REFERENCES Category_115022(CategoryID)
+
+EXEC sp_help Product_115022
+
+INSERT INTO Product_115022(ProdID, ProdName, UnitPrice, Quantity, CatID)
+VALUES(1, 'Pencil', 3, 15, null)
+
+INSERT INTO Category_115022 (CategoryID, CategoryName)
+VALUES(101, 'Accessories'),
+(102, 'Toys'),
+(103, 'Stationary'),
+(104, 'Craft')
+
+INSERT INTO Product_115022(ProdID, ProdName, UnitPrice, Quantity, CatID)
+VALUES(2, 'Pen', 10, 8, 103)
+
+INSERT INTO Product_115022(ProdID, ProdName, UnitPrice, Quantity, CatID)
+VALUES(3, 'Notebook', 40, 12, 103),
+(4, 'Scale', 5, 5, 103),
+(5, 'Doll', 200, 6, 102),
+(6, 'Car', 180, 3, 102),
+(7, 'Puzzle', 250, 12, 102),
+(8, 'Craft Paper', 30, 4, 104),
+(9, 'Tensils', 50, 7, 104),
+(10, 'Brush', 30, 4, 104),
+(11, 'Crayons', 80, 8, 104)
+
+SELECT * FROM Employee_115022
+
+UPDATE Employee_115022
+SET EmailID = 'robert@cg.com'
+WHERE EmployeeID = 101
+
+SELECT *
+FROM Employee_115022
+
+SELECT EmployeeID, EmployeeName, City
+FROM Employee_115022
+
+SELECT EmployeeID, EmployeeName, City
+FROM Employee_115022
+WHERE City = 'Pune'
+
+--Display all employee whose city is either Pune or joining is in year 2014
+SELECT EmployeeID, EmployeeName, City, DOJ
+FROM Employee_115022
+WHERE City = 'Pune' OR DATEPART(YY, DOJ) = 2014
+
+SELECT EmployeeID, EmployeeName, City, DOJ
+FROM Employee_115022
+WHERE City = 'Pune' OR (DOJ >= '01/01/2014' AND DOJ <= '12/31/2014')
+
+--Display all employee whose city is either Pune with joining in year 2014
+SELECT EmployeeID, EmployeeName, City, DOJ
+FROM Employee_115022
+WHERE City = 'Pune' AND DATEPART(YY, DOJ) = 2014
+
+--Display all employee whose name contains er
+SELECT EmployeeID, EmployeeName
+FROM Employee_115022
+WHERE EmployeeName LIKE '%er%'
+
+--Display all emploee whose name ends with ert
+SELECT EmployeeID, EmployeeName
+FROM Employee_115022
+WHERE EmployeeName LIKE '%ert'
+
+--Display all employee whose name start with Al
+SELECT EmployeeID, EmployeeName
+FROM Employee_115022
+WHERE EmployeeName LIKE 'Al%'
+
+--Display all products whose unit price is either 30, 3, 5
+SELECT ProdID, ProdName, UnitPrice
+FROM Product_115022
+WHERE UnitPrice = 30 OR UnitPrice = 3 OR UnitPrice = 5
+
+SELECT ProdID, ProdName, UnitPrice
+FROM Product_115022
+WHERE UnitPrice IN (30, 3, 5)
+
+--Display all products whose unit price is neither 30, 3, 5
+SELECT ProdID, ProdName, UnitPrice
+FROM Product_115022
+WHERE UnitPrice NOT IN (30, 3, 5)
+
+--Display all products whose unit price is with 10 to 60
+SELECT ProdID, ProdName, UnitPrice
+FROM Product_115022
+WHERE UnitPrice >= 10 AND UnitPrice <= 60
+
+SELECT ProdID, ProdName, UnitPrice
+FROM Product_115022
+WHERE UnitPrice BETWEEN 10 AND 60
+
+--Display all employee whose city is not provided
+SELECT EmployeeID, EmployeeName, City
+FROM Employee_115022
+WHERE City IS NULL
+
+--Display all employee whose city is provided
+SELECT EmployeeID, EmployeeName, City
+FROM Employee_115022
+WHERE City IS NOT NULL
+
+--Display category wise product count
+SELECT CatID, COUNT(ProdID)
+FROM Product_115022
+GROUP BY CatID
+
+SELECT COUNT(*)
+FROM Product_115022
+
+SELECT COUNT(CatID)
+FROM Product_115022
+
+--Display Age of all Employees
+SELECT EmployeeID, EmployeeName, DATEDIFF(YY, DOB, GETDATE()) as Age
+FROM Employee_115022
+
+--Display all categories whose product count is greater than 4
+SELECT CatID, COUNT(ProdID)
+FROM Product_115022
+GROUP BY CatID
+HAVING COUNT(ProdID) > 4
+
+--Display all employee whose birth year is 1989 or 1992
+SELECT EmployeeID, EmployeeName, DOB
+FROM Employee_115022
+WHERE DATEPART(YY, DOB) IN (1989, 1992)
+
+--Display all products with category name
+SELECT ProdID, ProdName, CatID, CategoryName
+FROM Product_115022 p, Category_115022 c
+WHERE p.CatID = c.CategoryID
+
+SELECT ProdID, ProdName, CatID, CategoryName
+FROM Product_115022 p
+INNER JOIN Category_115022 c
+ON p.CatID = c.CategoryID
+
+--Display all categories for which products are available
+SELECT DISTINCT CategoryID, CategoryName
+FROM Category_115022 c, Product_115022 p
+WHERE c.CategoryID = p.CatID
+
+SELECT CategoryID, CategoryName
+FROM Category_115022
+WHERE CategoryID IN (SELECT DISTINCT CatID
+						FROM Product_115022)
+
+--Display all categories with product information, whether the product is available or not
+SELECT CategoryID, CategoryName, ProdID, ProdName
+FROM Category_115022 c
+LEFT OUTER JOIN Product_115022 p
+ON c.CategoryID = p.CatID
+
+--Display all products with categories, whether the category is provided or not
+SELECT CategoryID, CategoryName, ProdID, ProdName
+FROM Category_115022 c
+RIGHT OUTER JOIN Product_115022 p
+ON c.CategoryID = p.CatID
+
+--Display all products whose category is not as Pen's category
+SELECT ProdID, ProdName, CatID
+FROM Product_115022
+WHERE CatID != (SELECT CatID
+				FROM Product_115022
+				WHERE ProdName = 'Pen')
+
+--Display all products whose price is greater than all stationary products
+SELECT ProdID, ProdName, UnitPrice
+FROM Product_115022
+WHERE UnitPrice > ALL (SELECT UnitPrice
+					FROM Product_115022, Category_115022
+					WHERE Product_115022.CatID = Category_115022.CategoryID
+					AND CategoryName = 'Stationary')
+
+SELECT ProdID, ProdName, UnitPrice
+FROM Product_115022
+WHERE UnitPrice > (SELECT MAX(UnitPrice)
+					FROM Product_115022, Category_115022
+					WHERE Product_115022.CatID = Category_115022.CategoryID
+					AND CategoryName = 'Stationary')
+
+--Display all products whose price is greater than any stationary products
+SELECT ProdID, ProdName, UnitPrice
+FROM Product_115022
+WHERE UnitPrice > ANY (SELECT UnitPrice
+					FROM Product_115022, Category_115022
+					WHERE Product_115022.CatID = Category_115022.CategoryID
+					AND CategoryName = 'Stationary')
+
+SELECT ProdID, ProdName, UnitPrice
+FROM Product_115022
+WHERE UnitPrice > (SELECT MIN(UnitPrice)
+					FROM Product_115022, Category_115022
+					WHERE Product_115022.CatID = Category_115022.CategoryID
+					AND CategoryName = 'Stationary')
+
+CREATE INDEX IDX_Emp_City_115022
+ON Employee_115022(City)
+
+EXEC sp_help Employee_115022
+
+CREATE VIEW vw_ProdAsCat_115022
+AS
+SELECT ProdID, ProdName, UnitPrice, CatID
+FROM Product_115022
+WHERE CatID = 103
+
+SELECT * FROM vw_ProdAsCat_115022
+
+SELECT * FROM syscomments WHERE text LIKE '%115022%'
+
+CREATE VIEW vw_Emp_115022
+WITH ENCRYPTION
+AS
+SELECT EmployeeID, EmployeeName, DOJ
+FROM Employee_115022
+
+SELECT * FROM vw_Emp_115022
+
+CREATE PROC usp_InsertEmployee_115022
+(
+	@Id			INT,
+	@Name		VARCHAR(30),
+	@Dob		DATE,
+	@Doj		DATE,
+	@Phone		CHAR(10),
+	@Email		VARCHAR(30),
+	@City		VARCHAR(20)
+)
+AS
+BEGIN
+	IF(@Id IS NULL)
+	BEGIN
+		RAISERROR('Employee ID cannot be NULL',1,1)
+		RETURN
+	END
+	ELSE IF EXISTS (SELECT EmployeeID From Employee_115022 
+			WHERE EmployeeID = @Id)
+	BEGIN
+		RAISERROR('Employee ID already exists', 1, 1)
+		RETURN
+	END
+
+	INSERT INTO Employee_115022(EmployeeID, EmployeeName, DOB, DOJ,EmailID, PhoneNo, City)
+	VALUES (@Id, @Name, @Dob, @Doj, @Email, @Phone, @City)
+END
+
+EXEC sp_helptext usp_InsertEmployee_115022
+
+CREATE PROC usp_ProdCountAsPerCat_115022
+(
+	@CatID		INT,
+	@Count		INT		OUT
+)
+AS
+BEGIN
+	SELECT @Count = COUNT(ProdID)
+	FROM Product_115022
+	WHERE CatID = @CatID
+END
+
+DECLARE @ProdCnt INT
+EXEC usp_ProdCountAsPerCat_115022 102, @ProdCnt OUT
+SELECT @ProdCnt
